@@ -92,7 +92,8 @@ public class HttpRequest {
      * @author 呐喊
      * @return
      */
-    public static String httpPost(String url,Map<String,String> map, boolean noNeedResponse){
+    public static String httpPost(String url,Map<String,String> map){
+    	 boolean noNeedResponse=false;
     	 CloseableHttpClient httpclient = HttpClients.createDefault(); 
         HttpPost method = new HttpPost(url);
         try {
@@ -126,9 +127,9 @@ public class HttpRequest {
                 try {
                     //读取服务器返回的数据
                     str = EntityUtils.toString(httpentity);
-                    if (noNeedResponse) {
+                    /*if (noNeedResponse) {
                         return null;
-                    }
+                    }*/
                     return str;
                 } catch (Exception e) {
                     System.out.println("post请求提交失败:" + url);
