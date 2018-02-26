@@ -17,7 +17,7 @@ public class SSLClient extends DefaultHttpClient {
 
 	public SSLClient() throws Exception{  
         super();  
-        SSLContext ctx = SSLContext.getInstance("TLS");  
+        SSLContext ctx = SSLContext.getInstance("TLS", "SunJSSE");  
         X509TrustManager tm = new X509TrustManager() {  
                 @Override  
                 public void checkClientTrusted(X509Certificate[] chain,  
