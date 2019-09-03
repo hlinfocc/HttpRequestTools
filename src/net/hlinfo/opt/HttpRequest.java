@@ -32,9 +32,24 @@ import org.apache.http.util.EntityUtils;
  * @HomePage http://www.hlinfo.cc
  */
 public class HttpRequest {
-	
-	
-	
+	/**
+	 * 返回请求http状态码
+	 */
+	public int statusCode = 200;
+	public String charset="utf-8";
+	public String getCharset() {
+		return charset;
+	}
+	public void setCharset(String charset) {
+		this.charset = charset;
+	}
+	public int getStatusCode() {
+		return statusCode;
+	}
+	public void setStatusCode(int statusCode) {
+		this.statusCode = statusCode;
+	}
+
 	/**
 	 * @param http get请求
 	 * @param url
@@ -46,7 +61,8 @@ public class HttpRequest {
         try {  
             // 创建httpget.    
             HttpGet httpget = new HttpGet(url);  
-            //System.out.println("URI:" + httpget.getURI());  
+            //System.out.println("URI:" + httpget.getURI());
+            httpget.setHeader("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0");
             // 执行get请求.    
             CloseableHttpResponse response = httpclient.execute(httpget);  
             try {  
@@ -55,6 +71,7 @@ public class HttpRequest {
                // System.out.println("--------------------------------------");  
                 // 打印响应状态    
                 System.out.println("response status:"+response.getStatusLine());  
+                this.setStatusCode(response.getStatusLine().getStatusCode());
                 if (response.getStatusLine().getStatusCode() == 200) {  
                     // 打印响应内容长度    
                     //System.out.println("Response content length: " + entity.getContentLength());  
@@ -63,7 +80,7 @@ public class HttpRequest {
                 	return EntityUtils.toString(entity);
                 }else{
                 	return "http请求失败,response status:"+response.getStatusLine();
-                }  
+                }
             } finally {  
                 response.close();  
             }  
@@ -88,22 +105,15 @@ public class HttpRequest {
      * @param http post请求
      * @param url  url地址
      * @param map  参数,Map对象
-     * @param noNeedResponse  true:不需要返回结果
      * @author 呐喊
      * @return
      */
-    public static String httpPost(String url,Map<String,String> map){
-    	 boolean noNeedResponse=false;
-    	 CloseableHttpClient httpclient = HttpClients.createDefault(); 
-        HttpPost method = new HttpPost(url);
+    public String httpPost(String url,Map<String,String> map){
+    	boolean noNeedResponse=false;
+    	CloseableHttpClient httpclient = HttpClients.createDefault(); 
+        HttpPost httppost = new HttpPost(url);
         try {
-            /*if (null != jsonParam) {
-                //解决中文乱码问题
-                StringEntity entity = new StringEntity(jsonParam.toString(), "utf-8");
-                entity.setContentEncoding("UTF-8");
-                entity.setContentType("application/json");
-                method.setEntity(entity);
-            }*/
+        	httppost.setHeader("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0");
           //设置参数  
             List<NameValuePair> list = new ArrayList<NameValuePair>();  
             Iterator iterator = map.entrySet().iterator();  
@@ -112,16 +122,18 @@ public class HttpRequest {
                 list.add(new BasicNameValuePair(elem.getKey(),elem.getValue()));  
             }  
             if(list.size() > 0){  
-                UrlEncodedFormEntity entity = new UrlEncodedFormEntity(list,"utf-8");  
-                method.setEntity(entity);  
+                UrlEncodedFormEntity entity = new UrlEncodedFormEntity(list,charset);  
+                httppost.setEntity(entity);  
             }  
             // 执行post请求
-            CloseableHttpResponse response = httpclient.execute(method);
+            CloseableHttpResponse response = httpclient.execute(httppost);
             url = URLDecoder.decode(url, "utf-8");
             // 获取响应实体    
             HttpEntity httpentity = response.getEntity();
             // 打印响应状态    
             System.out.println("response status:"+response.getStatusLine()); 
+            this.setStatusCode(response.getStatusLine().getStatusCode());
+            
             if (response.getStatusLine().getStatusCode() == 200) {
                 String str = "";
                 try {
@@ -156,13 +168,14 @@ public class HttpRequest {
      * @return
      */
     public String httpsPost(String url,Map<String,String> map){ 
-    	String charset="utf-8"; 
+    	String paramsCharset="utf-8"; 
         HttpClient httpClient = null;  
         HttpPost httpPost = null;  
         String result = null;  
         try{  
             httpClient = new SSLClient();  
-            httpPost = new HttpPost(url);  
+            httpPost = new HttpPost(url);
+            httpPost.setHeader("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0");
             //设置参数  
             List<NameValuePair> list = new ArrayList<NameValuePair>();  
             Iterator iterator = map.entrySet().iterator();  
@@ -171,10 +184,11 @@ public class HttpRequest {
                 list.add(new BasicNameValuePair(elem.getKey(),elem.getValue()));  
             }  
             if(list.size() > 0){  
-                UrlEncodedFormEntity entity = new UrlEncodedFormEntity(list,charset);  
+                UrlEncodedFormEntity entity = new UrlEncodedFormEntity(list,paramsCharset);  
                 httpPost.setEntity(entity);  
             }  
             HttpResponse response = httpClient.execute(httpPost);  
+            this.setStatusCode(response.getStatusLine().getStatusCode());
             if(response != null){  
                 HttpEntity resEntity = response.getEntity();  
                 if(resEntity != null){  
@@ -203,6 +217,7 @@ public class HttpRequest {
         try {
 			httpClient = new SSLClient();
 			httpget = new HttpGet(url);
+			httpget.setHeader("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0");
 			//System.out.println("URI:" + httpget.getURI());  
             // 执行get请求.    
 			HttpResponse response = httpClient.execute(httpget);
@@ -210,11 +225,11 @@ public class HttpRequest {
             HttpEntity httpentity = response.getEntity();
             // 打印响应状态    
             System.out.println("response status:"+response.getStatusLine());
+            this.setStatusCode(response.getStatusLine().getStatusCode());
             if (response.getStatusLine().getStatusCode() == 200) {  
-                // 打印响应内容长度    
-                //System.out.println("Response content length: " + entity.getContentLength());  
                 // 打印响应内容    
-               // System.out.println("Response content: " + EntityUtils.toString(entity));
+                //System.out.println("Response content: " + EntityUtils.toString(httpentity);  
+                // 响应内容  
             	return EntityUtils.toString(httpentity);
             }else{
             	return "http请求失败,response status:"+response.getStatusLine();
